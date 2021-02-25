@@ -100,14 +100,26 @@ contract SavingsFactory is AccessControl, Pausable, Ownable {
     }
 
     /**
-     * @dev Source of tokens. Override this method to modify the way in which the savings ultimately gets and sends
+     * @dev Redeem tokens. Override this method to modify the way in which the savings ultimately gets and sends
      * its tokens.
-     * @param tokenAmount Number of tokens to be emitted
      */
     function redeemTokens() public onlyOwner onlyWhileClosed {
-        require(_token.balanceOf(address(this) > 0);
+        require(_token.balanceOf(address(this) > 0, "Savings: Balance token <= 0");
         uint256 tokenBalance = _token.balanceOf(address(this))
         _token.safeTransfer(beneficiary_, tokenBalance);
+    }
+
+    /**
+     * @dev Faalback Redeem tokens. The ability to redeem token when key is lost of owner
+     * @param addressToken Address of the token
+     * @param tokenAmount Number of tokens to be emitted
+     * @param newBeneficiary_ New BnewBeneficiary address f.e. when key is lost
+    */
+    function fallbackRedeem(address addressToken, uint256 tokenAmount, address newBeneficiary_) onlyWhileClosed {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Savings: Caller is not admin");
+        require(addressToken.balanceOf(address(this) > 0, "Savings: Balance token <= 0");
+        require(tokenAmount >= addressToken.balanceOf(address(this), "Savings: tokenAmount  < token balance");
+        addressToken.safeTransfer(newBeneficiary_, tokenAmount);
     }
 
     // This function is called for all messages sent to
@@ -116,13 +128,13 @@ contract SavingsFactory is AccessControl, Pausable, Ownable {
     // Any call with non-empty calldata to this contract will execute
     // the fallback function (even if Ether is sent along with the call).
     fallback() external payable {
-        _simplicy.transfer(msg.value);
+        revert();
     }  
 
     // This function is called for plain Ether transfers, i.e.
     // for every call with empty calldata.
     receive() external payable {
-        _simplicy.transfer(msg.value);
+       revert();
     }
 
 }
